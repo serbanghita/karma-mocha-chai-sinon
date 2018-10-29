@@ -4,6 +4,7 @@ describe('jQuery Ajax Mock', function () {
     let spy;
 
     beforeEach(() => {
+        console.log(sinon.fakeServer.create);
         server = sinon.createFakeServer({respondImmediately: true});
         spy = sinon.spy(tracking, "trackEvent");
     });
@@ -17,29 +18,37 @@ describe('jQuery Ajax Mock', function () {
         expect([1, 2, 3].indexOf(4)).to.equal(-1);
     });
 
-    it('ajax mocking works #1', (done) => {
-
-        server.respondWith("GET", 'first/url', [ 200, { "Content-Type": "text/html" }, `mocked1` ]);
-        server.respondWith("GET", 'second/url', [ 200, { "Content-Type": "text/html" }, `mocked2` ]);
-
-        reloadApp().then((r1) => {
-            expect(r1).to.equal(`mocked1`);
-            expect(spy.callCount).to.equal(2);
-            done();
-        });
-
-        // server.respond();
-
-    });
+    // it('ajax mocking works #1', (done) => {
+    //
+    //     server.respondWith("GET", 'first/url', [ 200, { "Content-Type": "text/html" }, `mocked1` ]);
+    //     server.respondWith("GET", 'second/url', [ 200, { "Content-Type": "text/html" }, `mocked2` ]);
+    //
+    //     reloadApp().then((r1) => {
+    //         expect(r1).to.equal(`mocked1`);
+    //         expect(spy.callCount).to.equal(2);
+    //         done();
+    //     });
+    //
+    //     // server.respond();
+    //
+    // });
 
     it('ajax mocking works #2', (done) => {
 
         server.respondWith("GET", 'first/url', [ 200, { "Content-Type": "text/html" }, `mocked1` ]);
         server.respondWith("GET", 'second/url', [ 200, { "Content-Type": "text/html" }, `mocked2` ]);
 
+        console.log("queue", server.queue.length, server.requests.length, server.responses.length);
+
         reloadApp().then((r1) => {
-            waitFrames(60, () => {
-                expect(r1).to.equal(`mocked1`);
+            console.log("queue", server.queue.length,  server.requests.length, server.responses.length);
+            // waitFrames(1, () => {
+            //     console.log("queue", server.queue.length,  server.requests.length, server.responses.length);
+            //     // expect(r1).to.equal(`mocked1`);
+            //     expect(spy.callCount).to.equal(2);
+            //     done();
+            // });
+            waitForServerToFulfillRequests(server).then(() => {
                 expect(spy.callCount).to.equal(2);
                 done();
             });

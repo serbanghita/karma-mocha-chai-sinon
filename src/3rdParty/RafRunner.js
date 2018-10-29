@@ -25,3 +25,22 @@ function waitFrames(frames, callback) {
     const runner = new RafRunner(frames, callback);
     runner.loop();
 }
+
+
+function waitForServerToFulfillRequests(server, timeout) {
+    timeout = timeout || 100;
+    return new Promise((resolve, reject) => {
+        let checkCount = 0;
+        const i = setInterval(() => {
+            if (server.requests.length === server.responses.length) {
+                clearInterval(i);
+                resolve();
+            }
+            if (checkCount === 100) {
+                clearInterval(i);
+                reject(`Maximum waiting count of ${checkCount * 16} has passed.`);
+            }
+            checkCount++;
+        }, 16);
+    });
+}
